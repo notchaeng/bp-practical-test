@@ -1,3 +1,5 @@
+CREATE DATABASE `practical_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+
 CREATE TABLE `usuarios` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `direccion` varchar(255) DEFAULT NULL,
@@ -7,6 +9,7 @@ CREATE TABLE `usuarios` (
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 CREATE TABLE `cuentas` (
   `id` bigint NOT NULL AUTO_INCREMENT,
