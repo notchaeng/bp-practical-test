@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.nttdata.clients.entity.Client;
+import com.nttdata.clients.domain.entity.Client;
 import com.nttdata.clients.exception.ResourceNotFoundException;
 import com.nttdata.clients.repository.ClientRepository;
 import com.nttdata.clients.service.ClientService;

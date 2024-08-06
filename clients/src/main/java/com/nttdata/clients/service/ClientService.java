@@ -2,7 +2,7 @@ package com.nttdata.clients.service;
 
 import java.util.List;
 
-import com.nttdata.clients.entity.Client;
+import com.nttdata.clients.domain.entity.Client;
 
 public interface ClientService {
 

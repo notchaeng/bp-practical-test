@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.nttdata.clients.entity.Client;
+import com.nttdata.clients.domain.entity.Client;
 import com.nttdata.clients.repository.ClientRepository;
 
 @SpringBootTest

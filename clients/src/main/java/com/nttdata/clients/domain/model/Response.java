@@ -1,4 +1,4 @@
-package com.nttdata.clients.model;
+package com.nttdata.clients.domain.model;
 
 import java.io.Serializable;
 

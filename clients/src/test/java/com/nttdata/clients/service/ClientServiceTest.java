@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.nttdata.clients.entity.Client;
+import com.nttdata.clients.domain.entity.Client;
 import com.nttdata.clients.exception.ResourceNotFoundException;
 import com.nttdata.clients.repository.ClientRepository;
 import com.nttdata.clients.service.impl.ClientServiceImpl;

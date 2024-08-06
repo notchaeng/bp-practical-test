@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nttdata.clients.entity.Client;
-import com.nttdata.clients.model.Response;
+import com.nttdata.clients.domain.entity.Client;
+import com.nttdata.clients.domain.model.Response;
 import com.nttdata.clients.service.ClientService;
 import com.nttdata.clients.util.ResourseApplication;
 
