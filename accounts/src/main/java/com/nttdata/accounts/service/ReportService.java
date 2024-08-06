@@ -2,7 +2,7 @@ package com.nttdata.accounts.service;
 
 import java.util.List;
 
-import com.nttdata.accounts.model.Report;
+import com.nttdata.accounts.domain.model.Report;
 
 public interface ReportService {
 

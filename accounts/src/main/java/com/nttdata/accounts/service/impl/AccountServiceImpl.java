@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.nttdata.accounts.entity.Account;
+import com.nttdata.accounts.domain.entity.Account;
 import com.nttdata.accounts.exception.ResourceNotFoundException;
 import com.nttdata.accounts.repository.AccountRepository;
 import com.nttdata.accounts.service.AccountService;

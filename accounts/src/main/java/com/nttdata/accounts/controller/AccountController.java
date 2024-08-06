@@ -20,8 +20,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nttdata.accounts.entity.Account;
-import com.nttdata.accounts.model.Response;
+import com.nttdata.accounts.domain.entity.Account;
+import com.nttdata.accounts.domain.model.Response;
 import com.nttdata.accounts.service.AccountService;
 import com.nttdata.accounts.service.ClienteWebService;
 import com.nttdata.accounts.util.ResourseApplication;

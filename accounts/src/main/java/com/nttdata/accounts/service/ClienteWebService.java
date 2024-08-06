@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.nttdata.accounts.model.Response;
+import com.nttdata.accounts.domain.model.Response;
 
 import reactor.core.publisher.Mono;
 

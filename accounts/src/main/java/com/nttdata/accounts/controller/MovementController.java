@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nttdata.accounts.entity.Movement;
-import com.nttdata.accounts.model.Response;
+import com.nttdata.accounts.domain.entity.Movement;
+import com.nttdata.accounts.domain.model.Response;
 import com.nttdata.accounts.service.MovementService;
 import com.nttdata.accounts.util.ResourseApplication;
 

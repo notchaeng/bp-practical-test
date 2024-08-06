@@ -3,7 +3,7 @@ package com.nttdata.accounts.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.nttdata.accounts.entity.Movement;
+import com.nttdata.accounts.domain.entity.Movement;
 
 public interface MovementService {
 

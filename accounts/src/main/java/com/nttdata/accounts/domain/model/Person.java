@@ -1,4 +1,4 @@
-package com.nttdata.accounts.model;
+package com.nttdata.accounts.domain.model;
 
 import java.io.Serializable;
 
