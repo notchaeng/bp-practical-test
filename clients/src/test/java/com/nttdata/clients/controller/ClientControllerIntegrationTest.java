@@ -1,15 +1,17 @@
 package com.nttdata.clients.controller;
 
 import static org.hamcrest.Matchers.hasSize;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,37 +25,67 @@ public class ClientControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ClientRepository clientRepository;
+    private static String clientId;
 
-    @BeforeEach
-    public void setUp() {
-        // clientRepository.deleteAll();
+    @BeforeAll
+    public static void setUp(@Autowired ClientRepository clientRepository) {
         Client client = new Client();
         client.setNombre("John Doe");
         client.setDireccion("123 Main St");
         client.setTelefono("555-1234");
-        clientRepository.save(client);
+        client.setIdentificacion("123456");
+        client.setEstado(1);
+        clientId = clientRepository.save(client).getIdentificacion();
     }
 
     @Test
     public void testGetAllClients() throws Exception {
         mockMvc.perform(get("/clientes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("data", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    public void testGetClientById() throws Exception {
+        mockMvc.perform(get("/clientes/" + clientId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("John Doe"))
+                .andExpect(jsonPath("$.direccion").value("123 Main St"))
+                .andExpect(jsonPath("$.telefono").value("555-1234"));
     }
 
     @Test
     public void testCreateClient() throws Exception {
-        Client newClient = new Client();
-        newClient.setNombre("Jane Doe");
-        newClient.setDireccion("456 Elm St");
-        newClient.setTelefono("555-5678");
+        String newClientJson = "{ \"nombre\": \"Jane Doe\", \"direccion\": \"456 Elm St\", \"telefono\": \"555-5678\" }";
 
         mockMvc.perform(post("/clientes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"nombre\": \"Jane Doe\", \"direccion\": \"456 Elm St\", \"telefono\": \"555-5678\" }"))
+                .content(newClientJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("data.nombre").value("Jane Doe"));
+                .andExpect(jsonPath("$.nombre").value("Jane Doe"))
+                .andExpect(jsonPath("$.direccion").value("456 Elm St"))
+                .andExpect(jsonPath("$.telefono").value("555-5678"));
+    }
+
+    @Test
+    public void testUpdateClient() throws Exception {
+        String updatedClientJson = "{ \"nombre\": \"John Smith\", \"direccion\": \"789 Oak St\", \"telefono\": \"555-9876\" }";
+
+        mockMvc.perform(put("/clientes/" + clientId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updatedClientJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("John Smith"))
+                .andExpect(jsonPath("$.direccion").value("789 Oak St"))
+                .andExpect(jsonPath("$.telefono").value("555-9876"));
+    }
+
+    @Test
+    public void testDeleteClient() throws Exception {
+        mockMvc.perform(delete("/clientes/" + clientId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("John Smith"))
+                .andExpect(jsonPath("$.direccion").value("789 Oak St"))
+                .andExpect(jsonPath("$.telefono").value("555-9876"));
     }
 }

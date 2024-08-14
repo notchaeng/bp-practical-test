@@ -106,11 +106,11 @@ public class ClientServiceTest {
     @Test
     public void testSaveClient() {
         ClientDTO clientDTO = new ClientDTO();
-        clientDTO.setIdentificacion("123456");
+        clientDTO.setIdentificacion("1234567");
         clientDTO.setNombre("New Client");
 
         Client client = new Client();
-        client.setIdentificacion("123456");
+        client.setIdentificacion("1234567");
         client.setNombre("New Client");
 
         when(clientRepository.findByIdentificacionAndEstado("123456", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(client));
@@ -134,14 +134,10 @@ public class ClientServiceTest {
         client.setIdentificacion("123456");
         client.setNombre("Old Client");
 
-        Client updatedClient = new Client();
-        updatedClient.setIdentificacion("123456");
-        updatedClient.setNombre("Updated Client");
-
         when(clientRepository.findByIdentificacionAndEstado("123456", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(client));
-        when(clientMapper.toClient(clientDTO)).thenReturn(updatedClient);
-        when(clientMapper.toClientDTO(updatedClient)).thenReturn(clientDTO);
-        when(clientRepository.save(updatedClient)).thenReturn(updatedClient);
+        when(clientMapper.toClient(clientDTO)).thenReturn(client);
+        when(clientMapper.toClientDTO(client)).thenReturn(clientDTO);
+        when(clientRepository.save(client)).thenReturn(client);
 
         ClientDTO updatedClientDTO = clientService.updateClient("123456", clientDTO);
 
@@ -152,23 +148,19 @@ public class ClientServiceTest {
     @Test
     public void testDeleteClient() {
         ClientDTO clientDTO = new ClientDTO();
-        clientDTO.setIdentificacion("123456");
+        clientDTO.setIdentificacion("1234567");
         clientDTO.setEstado(Constants.DELETED_STATUS);
 
         Client client = new Client();
-        client.setIdentificacion("123456");
+        client.setIdentificacion("1234567");
         client.setEstado(Constants.ACTIVE_STATUS);
 
-        Client deletedClient = new Client();
-        deletedClient.setIdentificacion("123456");
-        deletedClient.setEstado(Constants.DELETED_STATUS);
+        when(clientRepository.findByIdentificacionAndEstado("1234567", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(client));
+        when(clientMapper.toClient(clientDTO)).thenReturn(client);
+        when(clientMapper.toClientDTO(client)).thenReturn(clientDTO);
+        when(clientRepository.save(client)).thenReturn(client);
 
-        when(clientRepository.findByIdentificacionAndEstado("123456", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(client));
-        when(clientMapper.toClient(clientDTO)).thenReturn(deletedClient);
-        when(clientMapper.toClientDTO(deletedClient)).thenReturn(clientDTO);
-        when(clientRepository.save(deletedClient)).thenReturn(deletedClient);
-
-        ClientDTO deletedClientDTO = clientService.deleteClient("123456");
+        ClientDTO deletedClientDTO = clientService.deleteClient("1234567");
 
         assertNotNull(deletedClientDTO);
         assertEquals(Constants.DELETED_STATUS, deletedClientDTO.getEstado());
