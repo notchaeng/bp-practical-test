@@ -2,17 +2,17 @@ package com.nttdata.clients.service;
 
 import java.util.List;
 
-import com.nttdata.clients.entity.Client;
+import com.nttdata.clients.domain.dto.ClientDTO;
 
 public interface ClientService {
 
-    List<Client> getAllClients();
+    List<ClientDTO> getAllClients();
 
-    Client getClientById(Long id);
+    ClientDTO getClientByIdentification(String identification);
 
-    Client saveClient(Client client);
+    ClientDTO saveClient(ClientDTO client);
 
-    Client updateClient(Long id, Client updatedClient);
+    ClientDTO updateClient(String identification, ClientDTO clientToUpdate);
 
-    Client deleteClient(Long id);
+    ClientDTO deleteClient(String identification);
 }

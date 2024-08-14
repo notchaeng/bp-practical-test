@@ -1,4 +1,4 @@
-package com.nttdata.accounts.entity;
+package com.nttdata.accounts.domain.entity;
 
 import java.io.Serializable;
 

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nttdata.accounts.model.Report;
-import com.nttdata.accounts.model.Response;
+import com.nttdata.accounts.domain.model.Report;
+import com.nttdata.accounts.domain.model.Response;
 import com.nttdata.accounts.service.ReportService;
 import com.nttdata.accounts.util.ResourseApplication;
 

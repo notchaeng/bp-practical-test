@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.nttdata.accounts.entity.Movement;
-import com.nttdata.accounts.model.Report;
+import com.nttdata.accounts.domain.entity.Movement;
+import com.nttdata.accounts.domain.model.Report;
 
 @Repository
 public interface MovementRepository extends JpaRepository<Movement, Long> {

@@ -15,7 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.nttdata.accounts.entity.Account;
+import com.nttdata.accounts.domain.entity.Account;
 import com.nttdata.accounts.exception.ResourceNotFoundException;
 import com.nttdata.accounts.repository.AccountRepository;
 import com.nttdata.accounts.util.Constants;

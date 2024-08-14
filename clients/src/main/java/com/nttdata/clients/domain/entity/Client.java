@@ -1,6 +1,6 @@
-package com.nttdata.clients.entity;
+package com.nttdata.clients.domain.entity;
 
-import com.nttdata.clients.model.Person;
+import com.nttdata.clients.domain.model.Person;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

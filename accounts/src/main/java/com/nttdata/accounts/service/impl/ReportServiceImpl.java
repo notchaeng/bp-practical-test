@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nttdata.accounts.domain.model.Report;
 import com.nttdata.accounts.exception.ResourceNotFoundException;
-import com.nttdata.accounts.model.Report;
 import com.nttdata.accounts.repository.MovementRepository;
 import com.nttdata.accounts.service.ReportService;
 import com.nttdata.accounts.util.ResourseApplication;
