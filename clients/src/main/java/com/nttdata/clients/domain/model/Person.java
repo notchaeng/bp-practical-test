@@ -30,13 +30,13 @@ public abstract class Person implements Serializable {
     @Column(name = "telefono")
     private String telefono;
 
+    @Column(name = "identificacion")
+    private String identificacion;
+
     @Transient
     private String genero;
 
     @Transient
     private int edad;
-
-    @Transient
-    private String identificacion;
 
 }

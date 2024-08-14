@@ -1,26 +1,32 @@
 package com.nttdata.clients.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.nttdata.clients.domain.dto.ClientDTO;
 import com.nttdata.clients.domain.entity.Client;
+import com.nttdata.clients.exception.ResourceFoundException;
 import com.nttdata.clients.exception.ResourceNotFoundException;
 import com.nttdata.clients.repository.ClientRepository;
 import com.nttdata.clients.service.ClientService;
+import com.nttdata.clients.service.mapper.ClientMapper;
 import com.nttdata.clients.util.Constants;
 import com.nttdata.clients.util.ResourseApplication;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
 
-    @Autowired
-    private ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
+    private final ClientMapper clientMapper;
 
     @Override
-    public List<Client> getAllClients() {
-        List<Client> clients = clientRepository.findByEstado(Constants.ACTIVE_STATUS);
+    public List<ClientDTO> getAllClients() {
+        List<ClientDTO> clients = clientRepository.findByEstado(Constants.ACTIVE_STATUS).stream().map(clientMapper::toClientDTO).toList();
         if (clients.isEmpty()) {
             throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("clients.not.found"));
         }
@@ -28,42 +34,34 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Client getClientById(Long id) {
-        Client client = clientRepository.findByIdAndEstado(id, Constants.ACTIVE_STATUS);
-        if (null == client) {
-            throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("client.not.found"));
+    public ClientDTO getClientByIdentification(String identification) {
+        return clientRepository.findByIdentificacionAndEstado(identification, Constants.ACTIVE_STATUS).map(clientMapper::toClientDTO).orElseThrow(()
+                -> new ResourceNotFoundException(ResourseApplication.properties.getProperty("client.not.found")));
+    }
+
+    @Override
+    public ClientDTO saveClient(ClientDTO client) {
+        Optional<Client> clientExist = clientRepository.findByIdentificacionAndEstado(client.getIdentificacion(), Constants.ACTIVE_STATUS);
+        if (clientExist.isPresent()) {
+            throw new ResourceFoundException(ResourseApplication.properties.getProperty("client.found"));
         }
-        return client;
+        return clientMapper.toClientDTO(clientRepository.save(clientMapper.toClient(client)));
     }
 
     @Override
-    public Client saveClient(Client client) {
-        Client validateClient = clientRepository.findByNombreAndEstado(removeSpaces(client.getNombre()), Constants.ACTIVE_STATUS);
-        if (null != validateClient) {
-            throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("client.found"));
-        }
-        return clientRepository.save(client);
+    public ClientDTO updateClient(String identification, ClientDTO clientToUpdate) {
+        ClientDTO client = getClientByIdentification(identification);
+        client.setNombre(clientToUpdate.getNombre());
+        client.setDireccion(clientToUpdate.getDireccion());
+        client.setTelefono(clientToUpdate.getTelefono());
+        client.setPassword(clientToUpdate.getPassword());
+        return clientMapper.toClientDTO(clientRepository.save(clientMapper.toClient(client)));
     }
 
     @Override
-    public Client updateClient(Long id, Client updatedClient) {
-        Client client = getClientById(id);
-        client.setNombre(removeSpaces(updatedClient.getNombre()));
-        client.setDireccion(updatedClient.getDireccion());
-        client.setTelefono(updatedClient.getTelefono());
-        client.setPassword(updatedClient.getPassword());
-        client.setEstado(updatedClient.getEstado());
-        return clientRepository.save(client);
-    }
-
-    @Override
-    public Client deleteClient(Long id) {
-        Client client = getClientById(id);
+    public ClientDTO deleteClient(String identification) {
+        ClientDTO client = getClientByIdentification(identification);
         client.setEstado(Constants.DELETED_STATUS);
-        return clientRepository.save(client);
-    }
-
-    private String removeSpaces(String string) {
-        return string.trim().replaceAll("\\s+", " ");
+        return clientMapper.toClientDTO(clientRepository.save(clientMapper.toClient(client)));
     }
 }
