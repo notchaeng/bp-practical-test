@@ -12,7 +12,8 @@ public interface ClientService {
 
     ClientDTO saveClient(ClientDTO client);
 
-    ClientDTO updateClient(String identification, ClientDTO clientToUpdate);
+    ClientDTO updateClient(String identification, ClientDTO clientToUpdate
+    );
 
     ClientDTO deleteClient(String identification);
 }

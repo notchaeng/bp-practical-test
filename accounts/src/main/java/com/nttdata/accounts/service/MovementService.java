@@ -1,20 +1,19 @@
 package com.nttdata.accounts.service;
 
 import java.util.List;
-import java.util.Optional;
 
-import com.nttdata.accounts.domain.entity.Movement;
+import com.nttdata.accounts.domain.dto.MovementDTO;
 
 public interface MovementService {
 
-    List<Movement> getAllMovements();
+    List<MovementDTO> getAllMovements();
 
-    Optional<Movement> getMovementById(Long id);
+    MovementDTO getMovementById(Long id);
 
-    Movement saveMovement(Movement movement);
+    MovementDTO saveMovement(MovementDTO movement);
 
-    void validateBalance (Double accountBalance, Double amount);
+    void validateBalance(Double accountBalance, Double amount);
 
-    Double calculateBalance (Double accountBalance, Double amount);
+    Double calculateBalance(Double accountBalance, Double amount);
 
 }

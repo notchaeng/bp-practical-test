@@ -1,12 +1,10 @@
 package com.nttdata.clients.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.nttdata.clients.domain.dto.ClientDTO;
-import com.nttdata.clients.domain.entity.Client;
 import com.nttdata.clients.exception.ResourceFoundException;
 import com.nttdata.clients.exception.ResourceNotFoundException;
 import com.nttdata.clients.repository.ClientRepository;
@@ -41,10 +39,9 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ClientDTO saveClient(ClientDTO client) {
-        Optional<Client> clientExist = clientRepository.findByIdentificacionAndEstado(client.getIdentificacion(), Constants.ACTIVE_STATUS);
-        if (clientExist.isPresent()) {
+        clientRepository.findByIdentificacionAndEstado(client.getIdentificacion(), Constants.ACTIVE_STATUS).ifPresent(res -> {
             throw new ResourceFoundException(ResourseApplication.properties.getProperty("client.found"));
-        }
+        });
         return clientMapper.toClientDTO(clientRepository.save(clientMapper.toClient(client)));
     }
 

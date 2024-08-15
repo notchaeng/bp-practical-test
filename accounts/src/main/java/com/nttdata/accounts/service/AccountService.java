@@ -2,17 +2,16 @@ package com.nttdata.accounts.service;
 
 import java.util.List;
 
-import com.nttdata.accounts.domain.entity.Account;
-
+import com.nttdata.accounts.domain.dto.AccountDTO;
 public interface AccountService {
 
-    List<Account> getAllAccounts();
+    List<AccountDTO> getAllAccounts();
 
-    Account getAccountById(Long id);
+    AccountDTO getAccountByNumber(String accountNumber);
 
-    Account saveAccount(Account account);
+    AccountDTO saveAccount(AccountDTO account);
 
-    Account updateAccount(Long id, Account updatedAccount);
+    AccountDTO updateAccount(String accountNumber, AccountDTO accountToUpdate);
 
-    Account deleteAccount(Long id);
+    AccountDTO deleteAccount(String accountNumber);
 }

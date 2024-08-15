@@ -1,27 +1,34 @@
 package com.nttdata.accounts.service.impl;
 
 import java.util.List;
-import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.nttdata.accounts.domain.entity.Account;
+import com.nttdata.accounts.domain.dto.AccountDTO;
+import com.nttdata.accounts.exception.ResourceFoundException;
 import com.nttdata.accounts.exception.ResourceNotFoundException;
 import com.nttdata.accounts.repository.AccountRepository;
 import com.nttdata.accounts.service.AccountService;
+import com.nttdata.accounts.service.ClienteWebService;
+import com.nttdata.accounts.service.mapper.AccountMapper;
 import com.nttdata.accounts.util.Constants;
 import com.nttdata.accounts.util.ResourseApplication;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+
+    private final AccountMapper accountMapper;
+
+    private final ClienteWebService clienteService;
 
     @Override
-    public List<Account> getAllAccounts() {
-        List<Account> accounts = accountRepository.findByEstado(Constants.ACTIVE_STATUS);
+    public List<AccountDTO> getAllAccounts() {
+        List<AccountDTO> accounts = accountRepository.findByEstado(Constants.ACTIVE_STATUS).stream().map(accountMapper::toAccountDTO).toList();
         if (accounts.isEmpty()) {
             throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("accounts.not.found"));
         }
@@ -29,45 +36,41 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account getAccountById(Long id) {
-        Account account = accountRepository.findByIdAndEstado(id, Constants.ACTIVE_STATUS);
-        if (null == account) {
-            throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("account.not.found"));
-        }
-        return account;
+    public AccountDTO getAccountByNumber(String accountNumber) {
+        return accountRepository.findByNumeroCuentaAndEstado(accountNumber, Constants.ACTIVE_STATUS).map(accountMapper::toAccountDTO).orElseThrow(()
+                -> new ResourceNotFoundException(ResourseApplication.properties.getProperty("account.not.found")));
+
     }
 
     @Override
-    public Account saveAccount(Account account) {
-        Account validateAccount = accountRepository.findByNumeroCuentaAndEstado(account.getNumeroCuenta(), Constants.ACTIVE_STATUS);
-        if (null != validateAccount) {
-            throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("account.exists"));
+    public AccountDTO saveAccount(AccountDTO account) {
+        try {
+            clienteService.getClienteById(account.getClienteId()).block();
+        } catch (Exception e) {
+            throw new ResourceNotFoundException(e.getMessage());
         }
-        return accountRepository.save(account);
+
+        accountRepository.findByNumeroCuentaAndEstado(account.getNumeroCuenta(), Constants.ACTIVE_STATUS).ifPresent(res -> {
+            throw new ResourceFoundException(ResourseApplication.properties.getProperty("account.exists"));
+        });
+
+        return accountMapper.toAccountDTO(accountRepository.save(accountMapper.toAccount(account)));
     }
 
     @Override
-    public Account updateAccount(Long id, Account updatedAccount) {
-        Account account = getAccountById(id);
-        if (!account.getNumeroCuenta().trim().equals(updatedAccount.getNumeroCuenta().trim())) {
-            throw new RuntimeException(ResourseApplication.properties.getProperty("account.number.error"));
-        }
-
-        if (!Objects.equals(account.getClienteId(), updatedAccount.getClienteId())){
-            throw new RuntimeException(ResourseApplication.properties.getProperty("account.client.error"));
-
-        }
-        account.setEstado(updatedAccount.getEstado());
-        account.setSaldoInicial(updatedAccount.getSaldoInicial());
-        account.setTipoCuenta(updatedAccount.getTipoCuenta());
-        return accountRepository.save(account);
+    public AccountDTO updateAccount(String accountNumber, AccountDTO accountToUpdate) {
+        AccountDTO account = getAccountByNumber(accountNumber);
+        account.setEstado(accountToUpdate.getEstado());
+        account.setSaldoInicial(accountToUpdate.getSaldoInicial());
+        account.setTipoCuenta(accountToUpdate.getTipoCuenta());
+        return accountMapper.toAccountDTO(accountRepository.save(accountMapper.toAccount(account)));
     }
 
     @Override
 
-    public Account deleteAccount(Long id) {
-        Account account = getAccountById(id);
+    public AccountDTO deleteAccount(String accountNumber) {
+        AccountDTO account = getAccountByNumber(accountNumber);
         account.setEstado(Constants.DELETED_STATUS);
-        return accountRepository.save(account);
+        return accountMapper.toAccountDTO(accountRepository.save(accountMapper.toAccount(account)));
     }
 }

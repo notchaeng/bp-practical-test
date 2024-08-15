@@ -2,17 +2,17 @@ package com.nttdata.accounts.domain.model;
 
 public interface Report {
 
-    String getFecha();
+    String getFechaMovimiento();
 
-    String getNombre();
+    String getNombreCliente();
 
-    String getNumero_cuenta();
+    String geNumeroCuenta();
 
-    String getTipo_movimiento();
+    String getTipoMovimiento();
 
-    Double getSaldo_inicial();
+    Double getSaldoInicial();
 
-    Double getValor();
+    Double getValorMovimiento();
 
-    Double getSaldo_final();
+    Double getSaldoFinal();
 }

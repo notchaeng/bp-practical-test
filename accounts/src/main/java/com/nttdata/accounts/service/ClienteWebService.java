@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.nttdata.accounts.domain.model.Response;
+import com.nttdata.accounts.domain.dto.ClientDTO;
+import com.nttdata.accounts.exception.ResourceNotFoundException;
 
 import reactor.core.publisher.Mono;
 
@@ -18,11 +20,17 @@ public class ClienteWebService {
     @Value("${clientes.service.url}")
     private String clientesServiceUrl;
 
-    public Mono<Response> getClienteById(Long id) {
+    public Mono<ClientDTO> getClienteById(String identification) {
         return webClientBuilder.build()
                 .get()
-                .uri(clientesServiceUrl + "/clientes/" + id)
+                .uri(clientesServiceUrl + "/clientes/" + identification)
                 .retrieve()
-                .bodyToMono(Response.class);
+                .bodyToMono(ClientDTO.class)
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    return Mono.error(new ResourceNotFoundException(e.getResponseBodyAsString()));
+                })
+                .onErrorResume(e -> {
+                    return Mono.error(new RuntimeException(e.getMessage()));
+                });
     }
 }

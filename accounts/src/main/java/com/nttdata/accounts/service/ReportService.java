@@ -6,6 +6,6 @@ import com.nttdata.accounts.domain.model.Report;
 
 public interface ReportService {
 
-    List<Report> getReport(String startDate, String endDate);
+    List<Report> getReport(String startDate, String endDate, String identification);
 
 }
