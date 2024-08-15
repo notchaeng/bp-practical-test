@@ -8,7 +8,7 @@ CREATE TABLE `usuarios` (
   `estado` int DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE `cuentas` (
@@ -21,7 +21,7 @@ CREATE TABLE `cuentas` (
   PRIMARY KEY (`id`),
   KEY `client_id_idx` (`client_id`),
   CONSTRAINT `client_id` FOREIGN KEY (`client_id`) REFERENCES `usuarios` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `movimientos` (
   `id` bigint NOT NULL AUTO_INCREMENT,
@@ -35,4 +35,4 @@ CREATE TABLE `movimientos` (
   PRIMARY KEY (`id`),
   KEY `cuenta_id` (`cuenta_id`),
   CONSTRAINT `cuenta_id` FOREIGN KEY (`cuenta_id`) REFERENCES `cuentas` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
