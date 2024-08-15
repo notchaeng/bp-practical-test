@@ -1,4 +1,4 @@
-# Proyecto ntt_data_practical_test
+# Proyecto bp_practical_test
 
 ## Requisitos previos
 - Docker 26.1.4
