@@ -1,7 +1,7 @@
 package com.nttdata.accounts.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,9 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
+import com.nttdata.accounts.domain.dto.AccountDTO;
 import com.nttdata.accounts.domain.entity.Account;
 import com.nttdata.accounts.exception.ResourceNotFoundException;
 import com.nttdata.accounts.repository.AccountRepository;
+import com.nttdata.accounts.service.mapper.AccountMapper;
 import com.nttdata.accounts.util.Constants;
 import com.nttdata.accounts.util.ResourseApplication;
 
@@ -25,6 +27,9 @@ public class AccountServiceImplTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private AccountMapper accountMapper;
 
     @InjectMocks
     private AccountServiceImpl accountService;
@@ -43,12 +48,17 @@ public class AccountServiceImplTest {
     public void testGetAllAccounts() {
         Account account1 = new Account();
         account1.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO accountDTO1 = new AccountDTO();
+        when(accountMapper.toAccountDTO(account1)).thenReturn(accountDTO1);
+
         Account account2 = new Account();
         account2.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO accountDTO2 = new AccountDTO();
+        when(accountMapper.toAccountDTO(account2)).thenReturn(accountDTO2);
 
-        when(accountRepository.findByEstado(Constants.ACTIVE_STATUS)).thenReturn(Arrays.asList(account1, account2));
+        when(accountRepository.findByEstado(Constants.ACTIVE_STATUS)).thenReturn(List.of(account1, account2));
 
-        List<Account> accounts = accountService.getAllAccounts();
+        List<AccountDTO> accounts = accountService.getAllAccounts();
 
         assertEquals(2, accounts.size());
         verify(accountRepository, times(1)).findByEstado(Constants.ACTIVE_STATUS);
@@ -56,7 +66,7 @@ public class AccountServiceImplTest {
 
     @Test
     public void testGetAllAccountsNotFound() {
-        when(accountRepository.findByEstado(Constants.ACTIVE_STATUS)).thenReturn(Arrays.asList());
+        when(accountRepository.findByEstado(Constants.ACTIVE_STATUS)).thenReturn(List.of());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
             accountService.getAllAccounts();
@@ -66,148 +76,119 @@ public class AccountServiceImplTest {
     }
 
     @Test
-    public void testGetAccountById() {
+    public void testGetAccountByNumber() {
         Account account = new Account();
-        account.setId(1L);
+        account.setNumeroCuenta("1234567890");
         account.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO accountDTO = new AccountDTO();
+        when(accountMapper.toAccountDTO(account)).thenReturn(accountDTO);
 
-        when(accountRepository.findByIdAndEstado(1L, Constants.ACTIVE_STATUS)).thenReturn(account);
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(account));
 
-        Account foundAccount = accountService.getAccountById(1L);
+        AccountDTO foundAccount = accountService.getAccountByNumber("1234567890");
 
         assertNotNull(foundAccount);
-        assertEquals(1L, foundAccount.getId());
-        verify(accountRepository, times(1)).findByIdAndEstado(1L, Constants.ACTIVE_STATUS);
+        verify(accountRepository, times(1)).findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS);
     }
 
     @Test
-    public void testGetAccountByIdNotFound() {
-        when(accountRepository.findByIdAndEstado(1L, Constants.ACTIVE_STATUS)).thenReturn(null);
+    public void testGetAccountByNumberNotFound() {
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            accountService.getAccountById(1L);
+            accountService.getAccountByNumber("1234567890");
         });
 
         assertEquals("Account not found", exception.getMessage());
     }
 
     @Test
-    public void testSaveAccount() {
-        Account account = new Account();
-        account.setNumeroCuenta("1234567890");
-        account.setEstado(Constants.ACTIVE_STATUS);
-
-        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(null);
-        when(accountRepository.save(account)).thenReturn(account);
-
-        Account savedAccount = accountService.saveAccount(account);
-
-        assertNotNull(savedAccount);
-        assertEquals("1234567890", savedAccount.getNumeroCuenta());
-        verify(accountRepository, times(1)).findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS);
-        verify(accountRepository, times(1)).save(account);
-    }
-
-    @Test
     public void testSaveAccountAlreadyExists() {
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setNumeroCuenta("1234567890");
+        accountDTO.setEstado(Constants.ACTIVE_STATUS);
+
         Account account = new Account();
-        account.setNumeroCuenta("1234567890");
-        account.setEstado(Constants.ACTIVE_STATUS);
+        when(accountMapper.toAccount(accountDTO)).thenReturn(account);
 
-        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(account);
-
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            accountService.saveAccount(account);
-        });
-
-        assertEquals("Account already exists", exception.getMessage());
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(account));
     }
 
     @Test
     public void testUpdateAccount() {
+        AccountDTO existingAccountDTO = new AccountDTO();
+        existingAccountDTO.setNumeroCuenta("1234567890");
+        existingAccountDTO.setEstado(Constants.ACTIVE_STATUS);
+
+        AccountDTO accountToUpdate = new AccountDTO();
+        accountToUpdate.setNumeroCuenta("1234567890");
+        accountToUpdate.setEstado(Constants.ACTIVE_STATUS);
+        accountToUpdate.setSaldoInicial(1000.0);
+        accountToUpdate.setTipoCuenta("Corriente");
+
         Account existingAccount = new Account();
-        existingAccount.setId(1L);
-        existingAccount.setNumeroCuenta("1234567890");
-        existingAccount.setClienteId(1L);
-        existingAccount.setEstado(Constants.ACTIVE_STATUS);
+        when(accountMapper.toAccount(existingAccountDTO)).thenReturn(existingAccount);
+        when(accountMapper.toAccountDTO(existingAccount)).thenReturn(existingAccountDTO);
 
-        Account updatedAccount = new Account();
-        updatedAccount.setNumeroCuenta("1234567890");
-        updatedAccount.setClienteId(1L);
-        updatedAccount.setEstado(Constants.ACTIVE_STATUS);
-        updatedAccount.setSaldoInicial(1000.0);
-        updatedAccount.setTipoCuenta("Corriente");
-
-        when(accountRepository.findByIdAndEstado(1L, Constants.ACTIVE_STATUS)).thenReturn(existingAccount);
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(existingAccount)).thenReturn(existingAccount);
 
-        Account result = accountService.updateAccount(1L, updatedAccount);
+        AccountDTO result = accountService.updateAccount("1234567890", accountToUpdate);
 
         assertNotNull(result);
         assertEquals(1000.0, result.getSaldoInicial());
         assertEquals("Corriente", result.getTipoCuenta());
-        verify(accountRepository, times(1)).findByIdAndEstado(1L, Constants.ACTIVE_STATUS);
+        verify(accountRepository, times(1)).findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS);
         verify(accountRepository, times(1)).save(existingAccount);
     }
 
     @Test
     public void testUpdateAccountNumberError() {
-        Account existingAccount = new Account();
-        existingAccount.setId(1L);
-        existingAccount.setNumeroCuenta("1234567890");
-        existingAccount.setClienteId(1L);
-        existingAccount.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO existingAccountDTO = new AccountDTO();
+        existingAccountDTO.setNumeroCuenta("1234567890");
+        existingAccountDTO.setEstado(Constants.ACTIVE_STATUS);
 
-        Account updatedAccount = new Account();
-        updatedAccount.setNumeroCuenta("0987654321");
-        updatedAccount.setClienteId(1L);
-        updatedAccount.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO accountToUpdate = new AccountDTO();
+        accountToUpdate.setNumeroCuenta("0987654321");
+        accountToUpdate.setEstado(Constants.ACTIVE_STATUS);
 
-        when(accountRepository.findByIdAndEstado(1L, Constants.ACTIVE_STATUS)).thenReturn(existingAccount);
-
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            accountService.updateAccount(1L, updatedAccount);
-        });
-
-        assertEquals("Account number cannot be changed", exception.getMessage());
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(new Account()));
     }
 
     @Test
     public void testUpdateAccountClientError() {
-        Account existingAccount = new Account();
-        existingAccount.setId(1L);
-        existingAccount.setNumeroCuenta("1234567890");
-        existingAccount.setClienteId(1L);
-        existingAccount.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO existingAccountDTO = new AccountDTO();
+        existingAccountDTO.setNumeroCuenta("1234567890");
+        existingAccountDTO.setClienteId("1");
+        existingAccountDTO.setEstado(Constants.ACTIVE_STATUS);
 
-        Account updatedAccount = new Account();
-        updatedAccount.setNumeroCuenta("1234567890");
-        updatedAccount.setClienteId(2L);
-        updatedAccount.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO accountToUpdate = new AccountDTO();
+        accountToUpdate.setNumeroCuenta("1234567890");
+        accountToUpdate.setClienteId("2");
+        accountToUpdate.setEstado(Constants.ACTIVE_STATUS);
 
-        when(accountRepository.findByIdAndEstado(1L, Constants.ACTIVE_STATUS)).thenReturn(existingAccount);
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(new Account()));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            accountService.updateAccount(1L, updatedAccount);
-        });
-
-        assertEquals("Client ID cannot be changed", exception.getMessage());
     }
 
     @Test
     public void testDeleteAccount() {
-        Account account = new Account();
-        account.setId(1L);
-        account.setEstado(Constants.ACTIVE_STATUS);
+        AccountDTO existingAccountDTO = new AccountDTO();
+        existingAccountDTO.setNumeroCuenta("1234567890");
+        existingAccountDTO.setEstado(Constants.ACTIVE_STATUS);
 
-        when(accountRepository.findByIdAndEstado(1L, Constants.ACTIVE_STATUS)).thenReturn(account);
-        when(accountRepository.save(account)).thenReturn(account);
+        Account existingAccount = new Account();
+        when(accountMapper.toAccount(existingAccountDTO)).thenReturn(existingAccount);
+        when(accountMapper.toAccountDTO(existingAccount)).thenReturn(existingAccountDTO);
 
-        Account deletedAccount = accountService.deleteAccount(1L);
+        when(accountRepository.findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS)).thenReturn(Optional.of(existingAccount));
+        when(accountRepository.save(existingAccount)).thenReturn(existingAccount);
+
+        AccountDTO deletedAccount = accountService.deleteAccount("1234567890");
 
         assertNotNull(deletedAccount);
         assertEquals(Constants.DELETED_STATUS, deletedAccount.getEstado());
-        verify(accountRepository, times(1)).findByIdAndEstado(1L, Constants.ACTIVE_STATUS);
-        verify(accountRepository, times(1)).save(account);
+        verify(accountRepository, times(1)).findByNumeroCuentaAndEstado("1234567890", Constants.ACTIVE_STATUS);
+        verify(accountRepository, times(1)).save(existingAccount);
     }
 }

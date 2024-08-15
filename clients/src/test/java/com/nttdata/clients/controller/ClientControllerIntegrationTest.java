@@ -42,7 +42,7 @@ public class ClientControllerIntegrationTest {
     public void testGetAllClients() throws Exception {
         mockMvc.perform(get("/clientes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 
     @Test

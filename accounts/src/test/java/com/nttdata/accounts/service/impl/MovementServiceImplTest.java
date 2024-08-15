@@ -1,6 +1,7 @@
 package com.nttdata.accounts.service.impl;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.times;
@@ -18,12 +19,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
+import com.nttdata.accounts.domain.dto.AccountDTO;
+import com.nttdata.accounts.domain.dto.MovementDTO;
 import com.nttdata.accounts.domain.entity.Account;
 import com.nttdata.accounts.domain.entity.Movement;
 import com.nttdata.accounts.exception.ResourceNotFoundException;
 import com.nttdata.accounts.repository.AccountRepository;
 import com.nttdata.accounts.repository.MovementRepository;
 import com.nttdata.accounts.service.AccountService;
+import com.nttdata.accounts.service.mapper.AccountMapper;
+import com.nttdata.accounts.service.mapper.MovementMapper;
 import com.nttdata.accounts.util.ResourseApplication;
 
 public class MovementServiceImplTest {
@@ -36,6 +41,12 @@ public class MovementServiceImplTest {
 
     @Mock
     private AccountService accountService;
+
+    @Mock
+    private MovementMapper movementMapper;
+
+    @Mock
+    private AccountMapper accountMapper;
 
     @InjectMocks
     private MovementServiceImpl movementService;
@@ -52,12 +63,13 @@ public class MovementServiceImplTest {
 
     @Test
     public void testGetAllMovements() {
-        Movement movement1 = new Movement();
-        Movement movement2 = new Movement();
+        MovementDTO movementDTO1 = new MovementDTO();
+        MovementDTO movementDTO2 = new MovementDTO();
 
-        when(movementRepository.findAll()).thenReturn(Arrays.asList(movement1, movement2));
+        when(movementRepository.findAll()).thenReturn(Arrays.asList(new Movement(), new Movement()));
+        when(movementMapper.toMovementDTO(any(Movement.class))).thenReturn(movementDTO1, movementDTO2);
 
-        List<Movement> movements = movementService.getAllMovements();
+        List<MovementDTO> movements = movementService.getAllMovements();
 
         assertEquals(2, movements.size());
         verify(movementRepository, times(1)).findAll();
@@ -78,13 +90,16 @@ public class MovementServiceImplTest {
     public void testGetMovementById() {
         Movement movement = new Movement();
         movement.setId(1L);
+        MovementDTO movementDTO = new MovementDTO();
+        movementDTO.setId(1L);
 
         when(movementRepository.findById(1L)).thenReturn(Optional.of(movement));
+        when(movementMapper.toMovementDTO(movement)).thenReturn(movementDTO);
 
-        Optional<Movement> foundMovement = movementService.getMovementById(1L);
+        MovementDTO foundMovement = movementService.getMovementById(1L);
 
-        assertTrue(foundMovement.isPresent());
-        assertEquals(1L, foundMovement.get().getId());
+        assertNotNull(foundMovement);
+        assertEquals(1L, foundMovement.getId());
         verify(movementRepository, times(1)).findById(1L);
     }
 
@@ -101,45 +116,52 @@ public class MovementServiceImplTest {
 
     @Test
     public void testSaveMovement() {
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setNumeroCuenta("123");
+        accountDTO.setSaldoInicial(1000.0);
+
+        MovementDTO movementDTO = new MovementDTO();
+        movementDTO.setCuenta(accountDTO);
+        movementDTO.setValor(500.0);
+        movementDTO.setFecha(new Date());
+
         Account account = new Account();
-        account.setId(1L);
-        account.setSaldoInicial(1000.0);
-
         Movement movement = new Movement();
-        movement.setCuenta(account);
-        movement.setValor(500.0);
 
-        when(accountService.getAccountById(1L)).thenReturn(account);
-        when(accountRepository.save(account)).thenReturn(account);
+        when(accountService.getAccountByNumber("123")).thenReturn(accountDTO);
+        when(accountMapper.toAccount(accountDTO)).thenReturn(account);
+        when(movementMapper.toMovement(movementDTO)).thenReturn(movement);
         when(movementRepository.save(movement)).thenReturn(movement);
+        when(movementMapper.toMovementDTO(movement)).thenReturn(movementDTO);
+        when(accountRepository.save(account)).thenReturn(account);
 
-        Movement savedMovement = movementService.saveMovement(movement);
+        MovementDTO savedMovement = movementService.saveMovement(movementDTO);
 
         assertNotNull(savedMovement);
         assertEquals(1500.0, savedMovement.getSaldoFinal());
-        verify(accountService, times(1)).getAccountById(1L);
+        verify(accountService, times(1)).getAccountByNumber("123");
         verify(accountRepository, times(1)).save(account);
         verify(movementRepository, times(1)).save(movement);
     }
 
     @Test
     public void testSaveMovementInsufficientBalance() {
-        Account account = new Account();
-        account.setId(1L);
-        account.setSaldoInicial(100.0);
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setNumeroCuenta("123");
+        accountDTO.setSaldoInicial(100.0);
 
-        Movement movement = new Movement();
-        movement.setCuenta(account);
-        movement.setValor(-200.0);
+        MovementDTO movementDTO = new MovementDTO();
+        movementDTO.setCuenta(accountDTO);
+        movementDTO.setValor(-200.0);
 
-        when(accountService.getAccountById(1L)).thenReturn(account);
+        when(accountService.getAccountByNumber("123")).thenReturn(accountDTO);
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            movementService.saveMovement(movement);
+            movementService.saveMovement(movementDTO);
         });
 
         assertEquals("Insufficient balance", exception.getMessage());
-        verify(accountService, times(1)).getAccountById(1L);
+        verify(accountService, times(1)).getAccountByNumber("123");
     }
 
     @Test
@@ -155,10 +177,10 @@ public class MovementServiceImplTest {
 
     @Test
     public void testCreateDescription() {
-        Movement positiveMovement = new Movement();
+        MovementDTO positiveMovement = new MovementDTO();
         positiveMovement.setValor(100.0);
 
-        Movement negativeMovement = new Movement();
+        MovementDTO negativeMovement = new MovementDTO();
         negativeMovement.setValor(-100.0);
 
         String positiveDescription = movementService.createDescription(positiveMovement);

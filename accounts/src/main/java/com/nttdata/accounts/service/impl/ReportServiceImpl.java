@@ -18,8 +18,8 @@ public class ReportServiceImpl implements ReportService {
     private MovementRepository movementRepository;
 
     @Override
-    public List<Report> getReport(String startDate, String endDate) {
-        List<Report> report = movementRepository.findReport(startDate, endDate);
+    public List<Report> getReport(String startDate, String endDate, String identification) {
+        List<Report> report = movementRepository.findReport(startDate, endDate, identification);
         if (report.isEmpty()) {
             throw new ResourceNotFoundException(ResourseApplication.properties.getProperty("report.not.found"));
         }

@@ -14,20 +14,25 @@ import com.nttdata.accounts.domain.model.Report;
 public interface MovementRepository extends JpaRepository<Movement, Long> {
 
     @Query(nativeQuery = true, value = """
-        select
-            m.fecha,
-            u.nombre,
-            c.numero_cuenta,
-            m.tipo_movimiento,
-            m.saldo_inicial,
-            m.valor,
-            m.saldo_final
-        from movimientos m
-        left join cuentas c on m.cuenta_id = c.id
-        left join usuarios u on c.client_id = u.id
-        where
-            date(fecha) between date(:startDate) and date(:endDate)
+        SELECT 
+            m.fecha as fechaMovimiento,
+            u.nombre as nombreCliente,
+            c.numero_cuenta as numeroCuenta,
+            m.tipo_movimiento as tipoMovimiento,
+            m.saldo_inicial as saldoInicial,
+            m.valor as valorMovimiento,
+            m.saldo_final as saldoFinal
+        FROM
+            movimientos m
+        LEFT JOIN
+            cuentas c ON m.cuenta_id = c.id
+        LEFT JOIN
+            usuarios u ON c.client_id = u.identificacion
+        WHERE
+            DATE(fecha) BETWEEN DATE(:startDate) AND date(:endDate)
+            AND u.identificacion = :identification
+            
     """)
-    List<Report> findReport(@Param("startDate") String startDate, @Param("endDate") String endDate);
+    List<Report> findReport(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("identification") String identification);
 
 }
